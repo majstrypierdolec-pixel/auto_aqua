@@ -1,9 +1,9 @@
-#include <Arduino.h>
-#include <Keypad.h>
+#include "screens.h"
 #include "chars.h"
 #include "display.h"
 #include "language.h"
-#include "screens.h"
+#include <Arduino.h>
+#include <Keypad.h>
 
 // ============================================================================
 // SCREENS.CPP - Screen implementations
@@ -12,9 +12,9 @@
 // NOTE: readLanguage() needs to be implemented in storage.cpp //why tho.
 // Odczyt pojedynczego pola z PROGMEM do bufora docelowego
 
-void readLanguageField(uint8_t idx, uint8_t offset, char* dest, uint8_t len) {
-  const void* base = (const void*)&LANGUAGES[idx % LANG_COUNT];
-  memcpy_P(dest, (const void*)((uintptr_t)base + offset), len);
+void readLanguageField(uint8_t idx, uint8_t offset, char *dest, uint8_t len) {
+  const void *base = (const void *)&LANGUAGES[idx % LANG_COUNT];
+  memcpy_P(dest, (const void *)((uintptr_t)base + offset), len);
   dest[len] = '\0';
 }
 
@@ -38,7 +38,7 @@ void splashScreen() {
   lcd.setCursor(4, 1);
   lcd.print("AQUA");
 
-  uint8_t slots[4] = { 0, 1, 2, 3 };
+  uint8_t slots[4] = {0, 1, 2, 3};
 
   for (uint8_t r = 0; r <= 8; r++) {
     lcd.setCursor(11, 0);
@@ -58,10 +58,12 @@ void splashScreen() {
 uint8_t langConfigScreen(uint8_t idx, bool editMode) {
   lcd.clear();
   loadGlyphSet(idx);
-  char langName[LANG_NAME_LEN+1];
-  char langPrompt[LANG_PROMPT_LEN+1];
-  readLanguageField(idx, offsetof(Language, langName), langName, LANG_NAME_VISIBLE);
-  readLanguageField(idx, offsetof(Language, langPrompt), langPrompt, LANG_PROMPT_VISIBLE);
+  char langName[LANG_NAME_LEN + 1];
+  char langPrompt[LANG_PROMPT_LEN + 1];
+  readLanguageField(idx, offsetof(Language, langName), langName,
+                    LANG_NAME_VISIBLE);
+  readLanguageField(idx, offsetof(Language, langPrompt), langPrompt,
+                    LANG_PROMPT_VISIBLE);
   lcd.setCursor(0, 0);
   lcdPrintWithGlyphs(langName, LANG_NAME_VISIBLE);
   lcd.setCursor(0, 1);
@@ -89,8 +91,10 @@ uint8_t langConfigScreen(uint8_t idx, bool editMode) {
       if (newlang != idx) {
         idx = newlang;
         loadGlyphSet(idx);
-        readLanguageField(idx, offsetof(Language, langName), langName, LANG_NAME_VISIBLE);
-        readLanguageField(idx, offsetof(Language, langPrompt), langPrompt, LANG_PROMPT_VISIBLE);
+        readLanguageField(idx, offsetof(Language, langName), langName,
+                          LANG_NAME_VISIBLE);
+        readLanguageField(idx, offsetof(Language, langPrompt), langPrompt,
+                          LANG_PROMPT_VISIBLE);
         lcd.setCursor(0, 0);
         lcdPrintWithGlyphs(langName, LANG_NAME_VISIBLE);
         lcd.setCursor(4, 1);
@@ -102,21 +106,22 @@ uint8_t langConfigScreen(uint8_t idx, bool editMode) {
   }
 }
 
-
 // Formatki LCD do PROGMEM
 const char LCD_TANK_FORMAT[] PROGMEM = "<-* _______l #->";
-const char LCD_VEL_FORMAT[]  PROGMEM = "<-* ____ml/s #->";
+const char LCD_VEL_FORMAT[] PROGMEM = "<-* ____ml/s #->";
 
 // Wspólna funkcja pomocnicza do edycji liczby na ekranie
-int32_t editNumberScreen(const char* label, const char* format, uint8_t entryCol, uint8_t maxDigits, uint32_t value, bool editMode, const char* unit = nullptr) {
+int32_t editNumberScreen(const char *label, const char *format,
+                         uint8_t entryCol, uint8_t maxDigits, uint32_t value,
+                         bool editMode, const char *unit = nullptr) {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(label);
   lcd.setCursor(0, 1);
   // Pobierz formatkę z PROGMEM do bufora o minimalnym rozmiarze
   char fmtBuf[20];
-  strncpy_P(fmtBuf, format, sizeof(fmtBuf)-1);
-  fmtBuf[sizeof(fmtBuf)-1] = '\0';
+  strncpy_P(fmtBuf, format, sizeof(fmtBuf) - 1);
+  fmtBuf[sizeof(fmtBuf) - 1] = '\0';
   lcd.print(fmtBuf);
 
   unsigned long lastBlink = millis();
@@ -128,7 +133,8 @@ int32_t editNumberScreen(const char* label, const char* format, uint8_t entryCol
 
   auto redrawNumber = [&](uint32_t val) {
     lcd.setCursor(entryCol, 1);
-    for (uint8_t i = 0; i < maxDigits; i++) lcd.print('_');
+    for (uint8_t i = 0; i < maxDigits; i++)
+      lcd.print('_');
     if (!digitsEntered) {
       curLen = 0;
       lastDigitPos = entryCol + maxDigits - 1;
@@ -147,11 +153,12 @@ int32_t editNumberScreen(const char* label, const char* format, uint8_t entryCol
         rev[ri++] = '0' + (v % 10);
         v /= 10;
       }
-      for (int8_t i = ri - 1; i >= 0; --i) tmp[idx++] = rev[i];
+      for (int8_t i = ri - 1; i >= 0; --i)
+        tmp[idx++] = rev[i];
     }
     tmp[idx] = '\0';
     if (idx > maxDigits) {
-      const char* p = tmp + (idx - maxDigits);
+      const char *p = tmp + (idx - maxDigits);
       lcd.setCursor(entryCol, 1);
       lcd.print(p);
       curLen = maxDigits;
@@ -186,8 +193,10 @@ int32_t editNumberScreen(const char* label, const char* format, uint8_t entryCol
       lastBlink = millis();
       showCursor = !showCursor;
       lcd.setCursor(lastDigitPos, 1);
-      if (showCursor) lcd.print('|');
-      else lcd.print(lastDigitChar);
+      if (showCursor)
+        lcd.print('|');
+      else
+        lcd.print(lastDigitChar);
     }
     if (!key) {
       delay(10);
@@ -196,7 +205,8 @@ int32_t editNumberScreen(const char* label, const char* format, uint8_t entryCol
     if (!localEdit) {
       if (key == '#') {
         localEdit = true;
-        if (number > 0 && number != (uint32_t)-1) digitsEntered = true;
+        if (number > 0 && number != (uint32_t)-1)
+          digitsEntered = true;
         else {
           digitsEntered = false;
           number = 0;
@@ -208,14 +218,16 @@ int32_t editNumberScreen(const char* label, const char* format, uint8_t entryCol
       continue;
     }
     if (key == '*') {
-      if (!digitsEntered || number == 0) return -1;
+      if (!digitsEntered || number == 0)
+        return -1;
       number = 0;
       digitsEntered = false;
       redrawNumber(number);
       continue;
     }
     if (key == '#') {
-      if (!digitsEntered || number == 0) return -1;
+      if (!digitsEntered || number == 0)
+        return -1;
       return (int32_t)number;
     }
     if (key >= '0' && key <= '9') {
@@ -232,7 +244,8 @@ int32_t editNumberScreen(const char* label, const char* format, uint8_t entryCol
   }
 }
 
-int32_t tankVolumeScreen(const char* tankVolumeBuf, bool editMode, uint32_t tankVolume) {
+int32_t tankVolumeScreen(const char *tankVolumeBuf, bool editMode,
+                         uint32_t tankVolume) {
   Serial.print("[TANK] entry: editMode=");
   Serial.print(editMode);
   Serial.print(" tankVolume=");
@@ -242,10 +255,12 @@ int32_t tankVolumeScreen(const char* tankVolumeBuf, bool editMode, uint32_t tank
     tankVolume = 0;
     editMode = true;
   }
-  return editNumberScreen(tankVolumeBuf, LCD_TANK_FORMAT, 4, 7, tankVolume, editMode);
+  return editNumberScreen(tankVolumeBuf, LCD_TANK_FORMAT, 4, 7, tankVolume,
+                          editMode);
 }
 
-int16_t velocityScreen(const char* velocityBuf, int pumpIndex, bool editMode, uint32_t velocity) {
+int16_t velocityScreen(const char *velocityBuf, int pumpIndex, bool editMode,
+                       uint32_t velocity) {
   Serial.print("[VEL] entry: editMode=");
   Serial.print(editMode);
   Serial.print(" velocity=");
@@ -253,8 +268,8 @@ int16_t velocityScreen(const char* velocityBuf, int pumpIndex, bool editMode, ui
   Serial.print(" index=");
   Serial.println(pumpIndex);
   char _velBuf[LANG_VELOCITYTITLE_LEN];
-  strncpy(_velBuf, velocityBuf, sizeof(_velBuf)-1);
-  _velBuf[sizeof(_velBuf)-1] = '\0';
+  strncpy(_velBuf, velocityBuf, sizeof(_velBuf) - 1);
+  _velBuf[sizeof(_velBuf) - 1] = '\0';
   for (int i = 0; _velBuf[i] != '\0'; i++) {
     if (_velBuf[i] == '#') {
       _velBuf[i] = '1' + pumpIndex;
@@ -269,7 +284,7 @@ int16_t velocityScreen(const char* velocityBuf, int pumpIndex, bool editMode, ui
   return editNumberScreen(_velBuf, LCD_VEL_FORMAT, 4, 4, velocity, editMode);
 }
 
-void lcdPrintWithGlyphs(const char* str, uint8_t length) {
+void lcdPrintWithGlyphs(const char *str, uint8_t length) {
   for (uint8_t i = 0; i < length; ++i) {
     lcd.write((uint8_t)str[i]);
   }
@@ -358,11 +373,15 @@ uint64_t timeSetupScreen() {
       uint8_t nh = (digits[0] - '0') * 10 + (digits[1] - '0');
       uint8_t nm = (digits[2] - '0') * 10 + (digits[3] - '0');
       uint8_t ns = (digits[4] - '0') * 10 + (digits[5] - '0');
-      if (nh > 23) nh = nh % 24;
-      if (nm > 59) nm = nm % 60;
-      if (ns > 59) ns = ns % 60;
+      if (nh > 23)
+        nh = nh % 24;
+      if (nm > 59)
+        nm = nm % 60;
+      if (ns > 59)
+        ns = ns % 60;
 
-      uint32_t enteredSeconds = (uint32_t)nh * 3600UL + (uint32_t)nm * 60UL + (uint32_t)ns;
+      uint32_t enteredSeconds =
+          (uint32_t)nh * 3600UL + (uint32_t)nm * 60UL + (uint32_t)ns;
       uint64_t tmptimeoffset = seconds() - (uint64_t)enteredSeconds;
       Serial.print("[TIME] entered HH:MM:SS = ");
       Serial.print(nh);
@@ -386,15 +405,17 @@ void showTime(uint64_t currentTime) {
   lcd.clear();
   lcd.setCursor(0, 0);
 
-  if (hh < 10) lcd.print('0');
+  if (hh < 10)
+    lcd.print('0');
   lcd.print(hh);
   lcd.print(':');
 
-  if (mm < 10) lcd.print('0');
+  if (mm < 10)
+    lcd.print('0');
   lcd.print(mm);
   lcd.print(':');
 
-  if (ss < 10) lcd.print('0');
+  if (ss < 10)
+    lcd.print('0');
   lcd.print(ss);
 }
-

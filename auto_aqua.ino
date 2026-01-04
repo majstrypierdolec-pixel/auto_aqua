@@ -1,4 +1,3 @@
-// Main sketch for Auto Aqua - refactored into setup() and loop().
 #include "screens.h"
 #include "display.h"
 #include "language.h"
